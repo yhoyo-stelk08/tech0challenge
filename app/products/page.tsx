@@ -1,5 +1,8 @@
+'use client';
+
 import Image from 'next/image';
-import Link from 'next/link'; // Import Next.js Link component
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 // Define the type for products
 interface Product {
@@ -8,11 +11,12 @@ interface Product {
  description: string;
  price: number;
  thumbnail: string;
+ category: string;
 }
 
 const PRODUCTS_API = 'https://dummyjson.com/products';
 
-// Server-side function to fetch products
+// Client-side function to fetch products
 async function fetchProducts(page: number, itemsPerPage: number) {
  try {
   const res = await fetch(
@@ -34,22 +38,97 @@ async function fetchProducts(page: number, itemsPerPage: number) {
  }
 }
 
-export default async function ProductsPage({ searchParams }: { searchParams: { page: string } }) {
+export default function ProductsPage({ searchParams }: { searchParams: { page: string } }) {
+ const [products, setProducts] = useState<Product[]>([]);
+ const [totalPages, setTotalPages] = useState(1);
+ const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
+ const [categoryFilter, setCategoryFilter] = useState<string>('');
+
  const page =
   searchParams.page && !isNaN(Number(searchParams.page)) ? Number(searchParams.page) : 1;
  const itemsPerPage = 10;
 
- const data = await fetchProducts(page, itemsPerPage);
- const products: Product[] = data.products;
- const totalPages = Math.ceil(data.total / itemsPerPage);
+ useEffect(() => {
+  // Fetch products on mount or page change
+  async function loadProducts() {
+   const data = await fetchProducts(page, itemsPerPage);
+   setProducts(data.products);
+   setTotalPages(Math.ceil(data.total / itemsPerPage));
+  }
+  loadProducts();
+ }, [page]);
+
+ // Reset Filters
+ const resetFilters = () => {
+  setCategoryFilter('');
+  setSortOrder(null);
+ };
+
+ // Filter products by category
+ const filteredProducts = products.filter((product) =>
+  categoryFilter ? product.category === categoryFilter : true
+ );
+
+ // Sort products by price
+ const sortedProducts = filteredProducts.sort((a, b) => {
+  if (sortOrder === 'asc') return a.price - b.price;
+  if (sortOrder === 'desc') return b.price - a.price;
+  return 0;
+ });
 
  return (
   <div className='container mx-auto py-10'>
    <h1 className='text-2xl font-bold mb-4'>Product Page</h1>
 
+   {/* Filters and Sorting */}
+   <div className='flex justify-between items-center mb-4'>
+    {/* Category Filter */}
+    <div>
+     <label htmlFor='category' className='mr-2'>
+      Filter by Category:
+     </label>
+     <select
+      id='category'
+      value={categoryFilter}
+      onChange={(e) => setCategoryFilter(e.target.value)}
+      className='border px-4 py-2 rounded-md'
+     >
+      <option value=''>All</option>
+      <option value='smartphones'>Smartphones</option>
+      <option value='laptops'>Laptops</option>
+      <option value='fragrances'>Fragrances</option>
+     </select>
+    </div>
+
+    {/* Sorting */}
+    <div>
+     <button
+      onClick={() => setSortOrder('asc')}
+      className={`mr-2 px-4 py-2 rounded-md ${
+       sortOrder === 'asc' ? 'bg-blue-500 text-white' : 'bg-gray-200'
+      }`}
+     >
+      Sort by Price (Low to High)
+     </button>
+     <button
+      onClick={() => setSortOrder('desc')}
+      className={`px-4 py-2 rounded-md ${
+       sortOrder === 'desc' ? 'bg-blue-500 text-white' : 'bg-gray-200'
+      }`}
+     >
+      Sort by Price (High to Low)
+     </button>
+    </div>
+
+    {/* Reset Filters */}
+    <button onClick={resetFilters} className='bg-red-500 text-white px-4 py-2 rounded-md'>
+     Reset Filters
+    </button>
+   </div>
+
    {/* Product List */}
-   <div className='grid grid-colscontm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
-    {products.map((product) => (
+   <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+    {sortedProducts.map((product) => (
      <div key={product.id} className='border p-4 rounded-md'>
       {/* Optimized Image with next/image */}
       <Image src={product.thumbnail} alt={product.title} width={200} height={200} />
@@ -66,7 +145,6 @@ export default async function ProductsPage({ searchParams }: { searchParams: { p
 
    {/* Pagination Controls */}
    <div className='mt-6 flex justify-center'>
-    {/* Use Link without <a> tag */}
     {page > 1 && (
      <Link href={`?page=${page - 1}`} className='mr-4 bg-blue-500 text-white px-4 py-2 rounded'>
       Previous
