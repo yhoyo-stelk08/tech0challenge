@@ -85,13 +85,13 @@ export default function ProductsPage({ searchParams }: { searchParams: { page: s
 
  return (
   <div className='container mx-auto p-10'>
-   <h1 className='text-3xl font-bold mb-4 text-center py-8'>Our Products</h1>
+   <h1 className='text-3xl font-bold mb-4 text-center py-8 text-white'>Our Products</h1>
 
    {/* Filters and Sorting */}
    <div className='flex justify-between items-center mb-4'>
     {/* Category Filter */}
     <div>
-     <label htmlFor='category' className='mr-2'>
+     <label htmlFor='category' className='mr-2 text-white'>
       Filter by Category:
      </label>
      <select
@@ -138,14 +138,17 @@ export default function ProductsPage({ searchParams }: { searchParams: { page: s
    {/* Product List */}
    <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
     {sortedProducts.map((product) => (
-     <div key={product.id} className='border p-4 rounded-md'>
+     <div
+      key={product.id}
+      className='border bg-gradient-to-br from-green-400 to-blue-500 p-4 text-slate-700 rounded-md'
+     >
       {/* Optimized Image with next/image */}
       <Image src={product.thumbnail} alt={product.title} width={200} height={200} />
-      <h2 className='text-xl font-bold'>{product.title}</h2>
-      <p>{product.description}</p>
-      <p className='text-lg font-semibold'>${product.price.toFixed(2)}</p>
+      <h2 className='text-xl font-bold py-4'>{product.title}</h2>
+      <p className='font-light'>{product.description}</p>
+      <p className='text-rose-950 font-semibold py-6 text-4xl'>${product.price.toFixed(2)}</p>
       {/* View Details Link */}
-      <Link href={`/products/${product.id}`} className='text-blue-500 hover:underline mt-2 block'>
+      <Link href={`/products/${product.id}`} className='text-white hover:underline mt-2 block'>
        View Details
       </Link>
      </div>
@@ -160,7 +163,7 @@ export default function ProductsPage({ searchParams }: { searchParams: { page: s
      </Link>
     )}
 
-    <span className='px-4 py-2'>
+    <span className='px-4 py-2 text-white'>
      {page} of {totalPages}
     </span>
 

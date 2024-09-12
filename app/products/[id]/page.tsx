@@ -18,14 +18,14 @@ export default async function ProductPage({ params }: { params: { id: string } }
 
  return (
   <div className='container mx-auto py-10 px-8'>
-   <Link href='/products' className='hover:text-blue-600 bg-clip-text'>
+   <Link href='/products' className='hover:text-green-500 bg-clip-text text-orange-100'>
     Back to Products
    </Link>
    {/* Product Carousel */}
    <div className='w-full h-96'>
     <Carousel>
      {product.images.map((image: string, index: number) => (
-      <div key={index} className='relative h-svh'>
+      <div key={index} className='relative h-full'>
        <Image
         src={image}
         alt={`${product.title} Image ${index + 1}`}
@@ -37,7 +37,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
      ))}
     </Carousel>
    </div>
-   <div className='flex flex-col justify-center items-center'>
+   <div className='flex flex-col justify-center items-center text-white'>
     <h1 className='text-3xl font-bold mb-6'>{product.title}</h1>
 
     {/* Product Description */}
