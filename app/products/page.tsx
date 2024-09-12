@@ -43,6 +43,7 @@ export default function ProductsPage({ searchParams }: { searchParams: { page: s
  const [totalPages, setTotalPages] = useState(1);
  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
  const [categoryFilter, setCategoryFilter] = useState<string>('');
+ const [categories, setCategories] = useState<string[]>([]); // Store the categories
 
  const page =
   searchParams.page && !isNaN(Number(searchParams.page)) ? Number(searchParams.page) : 1;
@@ -54,6 +55,12 @@ export default function ProductsPage({ searchParams }: { searchParams: { page: s
    const data = await fetchProducts(page, itemsPerPage);
    setProducts(data.products);
    setTotalPages(Math.ceil(data.total / itemsPerPage));
+
+   // Extract unique categories from the products
+   const uniqueCategories = Array.from(
+    new Set(data.products.map((product: Product) => product.category))
+   );
+   setCategories(uniqueCategories as string[]);
   }
   loadProducts();
  }, [page]);
@@ -77,8 +84,8 @@ export default function ProductsPage({ searchParams }: { searchParams: { page: s
  });
 
  return (
-  <div className='container mx-auto py-10'>
-   <h1 className='text-2xl font-bold mb-4'>Product Page</h1>
+  <div className='container mx-auto p-10'>
+   <h1 className='text-3xl font-bold mb-4 text-center py-8'>Our Products</h1>
 
    {/* Filters and Sorting */}
    <div className='flex justify-between items-center mb-4'>
@@ -94,9 +101,11 @@ export default function ProductsPage({ searchParams }: { searchParams: { page: s
       className='border px-4 py-2 rounded-md'
      >
       <option value=''>All</option>
-      <option value='smartphones'>Smartphones</option>
-      <option value='laptops'>Laptops</option>
-      <option value='fragrances'>Fragrances</option>
+      {categories.map((category) => (
+       <option key={category} value={category}>
+        {category.charAt(0).toUpperCase() + category.slice(1)}
+       </option>
+      ))}
      </select>
     </div>
 
