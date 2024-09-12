@@ -14,18 +14,29 @@ const PRODUCTS_API = 'https://dummyjson.com/products';
 
 // Server-side function to fetch products
 async function fetchProducts(page: number, itemsPerPage: number) {
- const res = await fetch(
-  `${PRODUCTS_API}?limit=${itemsPerPage}&skip=${(page - 1) * itemsPerPage}`,
-  {
-   cache: 'no-store', // Disable caching to fetch fresh data
+ try {
+  const res = await fetch(
+   `${PRODUCTS_API}?limit=${itemsPerPage}&skip=${(page - 1) * itemsPerPage}`,
+   {
+    cache: 'no-store', // Disable caching to fetch fresh data
+   }
+  );
+
+  if (!res.ok) {
+   throw new Error('Failed to fetch products');
   }
- );
- const data = await res.json();
- return data;
+
+  const data = await res.json();
+  return data;
+ } catch (error) {
+  console.error(error);
+  return { products: [], total: 0 };
+ }
 }
 
 export default async function ProductsPage({ searchParams }: { searchParams: { page: string } }) {
- const page = searchParams.page ? Number(searchParams.page) : 1; // Get page from query, default to 1
+ const page =
+  searchParams.page && !isNaN(Number(searchParams.page)) ? Number(searchParams.page) : 1;
  const itemsPerPage = 10;
 
  const data = await fetchProducts(page, itemsPerPage);
@@ -37,7 +48,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: { p
    <h1 className='text-2xl font-bold mb-4'>Product Page</h1>
 
    {/* Product List */}
-   <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+   <div className='grid grid-colscontm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
     {products.map((product) => (
      <div key={product.id} className='border p-4 rounded-md'>
       {/* Optimized Image with next/image */}
@@ -45,6 +56,10 @@ export default async function ProductsPage({ searchParams }: { searchParams: { p
       <h2 className='text-xl font-bold'>{product.title}</h2>
       <p>{product.description}</p>
       <p className='text-lg font-semibold'>${product.price.toFixed(2)}</p>
+      {/* View Details Link */}
+      <Link href={`/products/${product.id}`} className='text-blue-500 hover:underline mt-2 block'>
+       View Details
+      </Link>
      </div>
     ))}
    </div>
